@@ -1,0 +1,14 @@
+- /proc/*
+- /boot/*
+- /sys/*
+- /dev/*
+- /lib/modules/*
+- /usr/share/man/*
+- /usr/share/doc/*
+- /var/cache/*
+- /var/backups/*
+- /var/log/*
+- /var/tmp/*
+- /var/run/*
+- /var/lib/lxcfs/*
+- /run/*

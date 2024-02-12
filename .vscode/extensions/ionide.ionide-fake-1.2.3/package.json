@@ -1,0 +1,82 @@
+{
+	"name": "Ionide-FAKE",
+	"version": "1.2.3",
+	"publisher": "Ionide",
+	"description": "FAKE (F# Make) Support",
+	"categories": [
+		"Other"
+	],
+	"license": "SEE LICENSE IN LICENSE.md",
+	"icon": "images/logo.png",
+	"bugs": {
+		"url": "https://github.com/ionide/ionide-vscode-fake/issues"
+	},
+	"homepage": "http://ionide.io",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/ionide/ionide-vscode-fake.git"
+	},
+	"engines": {
+		"vscode": "^0.10.0"
+	},
+	"main": "./fake",
+	"contributes": {
+		"commands": [
+			{
+				"command": "fake.fakeBuild",
+				"title": "FAKE: Build"
+			},
+			{
+				"command": "fake.cancelBuild",
+				"title": "FAKE: Cancel"
+			},
+			{
+				"command": "fake.buildDefault",
+				"title": "FAKE: Build Default"
+			}
+		],
+		"outputChannels": [
+			"FAKE"
+		],
+		"keybindings": [
+			{
+				"command": "fake.buildDefault",
+				"key": "ctrl+f5",
+				"mac": "cmd+f5"
+			}
+		],
+		"configuration": {
+			"type": "object",
+			"title": "FAKE configuration",
+			"properties": {
+				"FAKE.autoshow": {
+					"type": "boolean",
+					"default": true,
+					"description": "Automatically shows FAKE output panel"
+				}
+			}
+		}
+	},
+	"activationEvents": [
+		"onCommand:fake.fakeBuild",
+		"onCommand:fake.cancelBuild",
+		"onCommand:fake.buildDefault"
+	],
+	"devDependencies": {
+		"vscode": "*"
+	},
+	"dependencies": {
+		"path": "*",
+		"toml": "*"
+	},
+	"__metadata": {
+		"id": "4528c74a-be1c-4ca5-8e82-a594d84b24be",
+		"publisherId": "6841d314-11e9-4ec1-a088-08558c6effee",
+		"publisherDisplayName": "Ionide",
+		"targetPlatform": "undefined",
+		"updated": false,
+		"isPreReleaseVersion": false,
+		"installedTimestamp": 1698334434937,
+		"preRelease": false
+	}
+}

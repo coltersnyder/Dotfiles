@@ -1,0 +1,10 @@
+{
+  "configurations": [
+      {
+          "name": "Kubernetes: Run/Debug",
+          "type": "cloudcode.kubernetes",
+          "request": "launch",
+          "skaffoldConfig": "${workspaceFolder}/src/skaffold.yaml"
+      }
+  ]
+}
