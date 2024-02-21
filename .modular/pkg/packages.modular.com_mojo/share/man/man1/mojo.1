@@ -1,0 +1,60 @@
+.TH "MOJO" "1"
+.nh
+.ad l
+.SH "NAME"
+mojo \[em] The Mojo🔥 command line interface.
+.SH "SYNOPSIS"
+\fBmojo\fR \fIcommand\fR
+.br
+\fBmojo\fR [\fIrun\-options\fR] \fIpath\fR
+.br
+\fBmojo\fR [\fIoptions\fR]
+.br
+\fBmojo\fR
+.br
+.SH "DESCRIPTION"
+The `mojo` CLI provides all the tools you need for Mojo development, such as commands to run, compile, and package Mojo code. A list of all commands are listed below, and you can learn more about each one by adding the `\-\-help` option to the command (for example, `mojo package \-\-help`).
+
+However, you may omit the `run` and `repl` commands. That is, you can run a Mojo file by simply passing the filename to `mojo`:
+
+    mojo hello.mojo
+
+And you can start a REPL session by running `mojo` with no commands.
+
+To update Mojo to the latest version, use the [`modular` tool](https://docs.modular.com/cli/):
+
+    modular update mojo
+
+You can check your current version with `mojo \-\-version`. For information about Mojo updates, see the [Mojo changelog](https://docs.modular.com/mojo/changelog.html).
+.SH "COMMANDS"
+\fBrun\fR \[em] Builds and executes a Mojo file.
+.br
+\fBbuild\fR \[em] Builds an executable from a Mojo file.
+.br
+\fBrepl\fR \[em] Launches the Mojo REPL.
+.br
+\fBdebug\fR \[em] Launches the LLDB debugger with support for debugging Mojo programs.
+.br
+\fBpackage\fR \[em] Compiles a Mojo package.
+.br
+\fBformat\fR \[em] Formats Mojo source files.
+.br
+\fBdoc\fR \[em] Compiles docstrings from a Mojo file.
+.br
+\fBdemangle\fR \[em] Demangles the given name.
+.br
+.SH "OPTIONS"
+.SS "Diagnostic options"
+.sp
+\fB\-\-version\fR, \fB\-v\fR
+.RS 4
+Prints the Mojo version and exits.
+.RE
+.sp
+.SS "Common options"
+.sp
+\fB\-\-help\fR, \fB\-h\fR
+.RS 4
+Displays help information.
+.RE
+.sp

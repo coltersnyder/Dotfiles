@@ -1,0 +1,34 @@
+.TH "MOJO\-FORMAT" "1"
+.nh
+.ad l
+.SH "NAME"
+mojo\-format \[em] Formats Mojo source files.
+.SH "SYNOPSIS"
+\fBmojo format\fR [\fIoptions\fR] \fIsources...\fR
+.br
+.SH "DESCRIPTION"
+Formats the given set of Mojo sources using a Mojo\-specific lint tool.
+.SH "OPTIONS"
+.SS "Format options"
+.sp
+\fB\-\-line\-length\fR \fIINTEGER\fR, \fB\-l\fR \fIINTEGER\fR
+.RS 4
+Sets the max character line length. Default is 80.
+.RE
+.sp
+.SS "Diagnostic options"
+.sp
+\fB\-\-quiet\fR, \fB\-q\fR
+.RS 4
+Disables non\-error messages.
+.RE
+.sp
+.SS "Common options"
+.sp
+\fB\-\-help\fR, \fB\-h\fR
+.RS 4
+Displays help information.
+.RE
+.sp
+.SH "SEE ALSO"
+\fBmojo\fR(1)

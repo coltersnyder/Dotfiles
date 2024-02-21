@@ -1,0 +1,109 @@
+.TH "MOJO\-PACKAGE" "1"
+.nh
+.ad l
+.SH "NAME"
+mojo\-package \[em] Compiles a Mojo package.
+.SH "SYNOPSIS"
+\fBmojo package\fR [\fIoptions\fR] \fIpath\fR
+.br
+.SH "DESCRIPTION"
+Compiles a directory of Mojo source files into a binary package suitable to share and import into other Mojo programs and modules.
+
+To create a Mojo package, first add an `__init__.mojo` file to your package directory. Then pass that directory name to this command, and specify the output path and filename with `\-o`.
+
+For more information, see [Mojo modules and packages](https://docs.modular.com/mojo/manual/get\-started/packages.html).
+.SH "OPTIONS"
+.SS "Output options"
+.sp
+\fB\-o\fR \fIPATH\fR
+.RS 4
+Sets the path and filename for the output package. The filename must end with either `.mojopkg` or `.📦`. The filename given here defines the package name you can then use to import the code (minus the file extension). If you don't specify this option, a `.mojopkg` file is generated in the current working directory, with a name based on the name of the input directory.
+.RE
+.sp
+.SS "Compilation options"
+.sp
+\fB\-\-no\-optimization\fR, \fB\-O0\fR
+.RS 4
+Disables compiler optimizations. This might reduce the amount of time it takes to compile the Mojo source file. It might also reduce the runtime performance of the compiled executable.
+.RE
+.sp
+\fB\-I\fR \fIPATH\fR
+.RS 4
+Appends the given path to the list of directories to search for imported Mojo files.
+.RE
+.sp
+\fB\-D\fR \fIKEY=VALUE\fR
+.RS 4
+Defines a named value that can be used from within the Mojo source file being executed. For example, `\-D foo=42` defines a name `foo` that, when queried with the `sys.param_env` module from within the Mojo program, would yield the compile\-time value `42`.
+.RE
+.sp
+.SS "Target options"
+.sp
+\fB\-\-target\-triple\fR \fITRIPLE\fR
+.RS 4
+Sets the compilation target triple. Defaults to the host target.
+.RE
+.sp
+\fB\-\-target\-cpu\fR \fICPU\fR
+.RS 4
+Sets the compilation target CPU. Defaults to the host CPU.
+.RE
+.sp
+\fB\-\-target\-features\fR \fIFEATURES\fR
+.RS 4
+Sets the compilation target CPU features. Defaults to the host features.
+.RE
+.sp
+\fB\-\-march\fR \fIARCHITECTURE\fR
+.RS 4
+Sets the architecture for which to generate code.
+.RE
+.sp
+\fB\-\-mcpu\fR \fICPU\fR
+.RS 4
+Sets the CPU for which to generate code.
+.RE
+.sp
+\fB\-\-mtune\fR \fITUNE\fR
+.RS 4
+Sets the CPU for which to tune code.
+.RE
+.sp
+.SS "Diagnostic options"
+.sp
+\fB\-\-warn\-missing\-doc\-strings\fR
+.RS 4
+Emits warnings for missing or partial docstrings.
+.RE
+.sp
+\fB\-\-max\-notes\-per\-diagnostic\fR \fIINTEGER\fR
+.RS 4
+When the Mojo compiler emits diagnostics, it sometimes also prints notes with additional information. This option sets an upper threshold on the number of notes that can be printed with a diagnostic. If not specified, the default maximum is 10.
+.RE
+.sp
+.SS "Experimental compilation options"
+.sp
+\fB\-\-debug\-level\fR \fILEVEL\fR
+.RS 4
+Sets the level of debug info to use at compilation. The value must be one of: `none` (the default value), `line\-tables`, or `full`. Please note that there are issues when generating debug info for some Mojo programs that have yet to be addressed.
+.RE
+.sp
+\fB\-\-sanitize\fR \fICHECK\fR
+.RS 4
+Turns on runtime checks. The following values are supported: `address` (detects memory issues), and `thread` (detects multi\-threading issues). Please note that these checks are not currently supported when executing Mojo programs.
+.RE
+.sp
+\fB\-\-debug\-info\-language\fR \fILANGUAGE\fR
+.RS 4
+Sets the language to emit as part of the debug info. The supported languages are: `Mojo`, and `C`. `C` is the default, and is useful to enable rudimentary debugging and binary introspection in tools that don't understand Mojo.
+.RE
+.sp
+.SS "Common options"
+.sp
+\fB\-\-help\fR, \fB\-h\fR
+.RS 4
+Displays help information.
+.RE
+.sp
+.SH "SEE ALSO"
+\fBmojo\fR(1)

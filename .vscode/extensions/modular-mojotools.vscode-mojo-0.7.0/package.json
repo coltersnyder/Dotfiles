@@ -1,0 +1,699 @@
+{
+	"name": "vscode-mojo",
+	"displayName": "Mojo 🔥",
+	"description": "Mojo language support",
+	"version": "0.7.0",
+	"publisher": "modular-mojotools",
+	"icon": "icon.png",
+	"engines": {
+		"vscode": "^1.75.0"
+	},
+	"categories": [
+		"Programming Languages",
+		"Formatters",
+		"Debuggers"
+	],
+	"keywords": [
+		"mojo",
+		"🔥"
+	],
+	"activationEvents": [
+		"onDebugDynamicConfigurations:mojo-lldb",
+		"onDebugResolve:mojo-lldb",
+		"onUri",
+		"onStartupFinished",
+		"onCommand:mojo.searchProgramToAttach"
+	],
+	"main": "./out/extension",
+	"scripts": {
+		"vscode:prepublish": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"format": "clang-format -i --glob=\"{src,test}/*.ts\"",
+		"package": "vsce package --out ./out/vscode-mojo.vsix",
+		"publish": "vsce publish"
+	},
+	"devDependencies": {
+		"@types/ini": "~1.3.31",
+		"@types/mocha": "^7.0.2",
+		"@types/node": "^18.11.18",
+		"@types/shell-escape": "0.2.0",
+		"@types/vscode": "~1.74.0",
+		"@vscode/vsce": "^2.19.0",
+		"typescript": "^4.6.4"
+	},
+	"dependencies": {
+		"chokidar": "3.5.2",
+		"ini": "4.1.1",
+		"ps-list": "8.1.1",
+		"shell-escape": "0.2.0",
+		"string-argv": "0.3.2",
+		"vscode-languageclient": "^8.0.2-next.5",
+		"yaml": "2.3.2"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/modularml/mojo.git"
+	},
+	"contributes": {
+		"languages": [
+			{
+				"id": "mojo",
+				"icon": {
+					"light": "icon.png",
+					"dark": "icon.png"
+				},
+				"aliases": [
+					"mojo"
+				],
+				"extensions": [
+					".mojo",
+					".🔥"
+				],
+				"configuration": "./language-configuration.json"
+			},
+			{
+				"id": "mojo-injection"
+			}
+		],
+		"grammars": [
+			{
+				"language": "mojo",
+				"scopeName": "source.mojo",
+				"path": "./syntaxes/mojo.syntax.json",
+				"embeddedLanguages": {
+					"meta.embedded.block.mojo": "mojo"
+				}
+			},
+			{
+				"language": "mojo-injection",
+				"scopeName": "markdown.mojo.codeblock",
+				"path": "./syntaxes/markdown.syntax.json",
+				"injectTo": [
+					"text.html.markdown"
+				],
+				"embeddedLanguages": {
+					"meta.embedded.block.mojo": "mojo"
+				}
+			}
+		],
+		"configuration": {
+			"type": "object",
+			"title": "Mojo",
+			"properties": {
+				"mojo.modularHomePath": {
+					"scope": "resource",
+					"type": "string",
+					"description": "The path to the MODULAR_HOME containing the Mojo SDK installation."
+				},
+				"mojo.onSettingsChanged": {
+					"type": "string",
+					"default": "prompt",
+					"description": "Action taken when a setting change requires a server restart to take effect.",
+					"enum": [
+						"prompt",
+						"restart",
+						"ignore"
+					],
+					"enumDescriptions": [
+						"Prompt the user for restarting the server",
+						"Automatically restart the server",
+						"Do nothing"
+					]
+				},
+				"mojo.formatting.args": {
+					"scope": "resource",
+					"type": "array",
+					"description": "Arguments passed in. Each argument is a separate item in the array."
+				},
+				"mojo.lldb.rpcServer": {
+					"scope": "resource",
+					"description": "Start an RPC server that will accept debug requests. This server is not linked to any workspace folders, so variable substitution in the debug configuration is not supported at that level. To use the server, the `MODULAR_HOME` environment variable must be defined in the VS Code environment, or the `mojo.modularHomePath` VS Code setting must be set, or otherwise all debug configuration requests must include the `modularHomePath` entry.",
+					"type": "object",
+					"properties": {
+						"port": {
+							"type": "number",
+							"description": "The port to use for creating this server in localhost."
+						},
+						"token": {
+							"type": "string",
+							"description": "An optional string that is used for basic security. If set, debug configurations must include the `token` entry with this value."
+						}
+					},
+					"order": 2
+				}
+			}
+		},
+		"commands": [
+			{
+				"category": "Developer",
+				"command": "mojo.restart-suspended",
+				"title": "Restart the Mojo Extension and Launch the LSP Server Suspended"
+			},
+			{
+				"category": "Mojo",
+				"command": "mojo.restart",
+				"title": "Restart the Extension"
+			},
+			{
+				"category": "Mojo",
+				"command": "mojo.execFileInTerminal",
+				"icon": "$(play)",
+				"title": "Run Mojo File"
+			},
+			{
+				"category": "Mojo",
+				"command": "mojo.execFileInDedicatedTerminal",
+				"icon": "$(play-circle)",
+				"title": "Run Mojo File in Dedicated Terminal"
+			},
+			{
+				"category": "Mojo",
+				"command": "mojo.debugFile",
+				"icon": "$(debug-alt)",
+				"title": "Debug Mojo File"
+			},
+			{
+				"category": "Mojo",
+				"command": "mojo.debugFileInTerminal",
+				"icon": "$(debug-console)",
+				"title": "Debug Mojo File in Dedicated Terminal"
+			},
+			{
+				"category": "Mojo",
+				"command": "mojo.attachToProcess",
+				"icon": "$(debug)",
+				"title": "Attach to Process"
+			}
+		],
+		"submenus": [
+			{
+				"id": "explorer/context/mojo",
+				"label": "Mojo"
+			}
+		],
+		"menus": {
+			"explorer/context": [
+				{
+					"submenu": "explorer/context/mojo",
+					"group": "0_mojo"
+				}
+			],
+			"commandPalette": [
+				{
+					"command": "mojo.execFileInTerminal",
+					"when": "resourceLangId == mojo && !virtualWorkspace && shellExecutionSupported"
+				},
+				{
+					"command": "mojo.execFileInDedicatedTerminal",
+					"when": "resourceLangId == mojo && !virtualWorkspace && shellExecutionSupported"
+				},
+				{
+					"command": "mojo.debugFile",
+					"when": "resourceLangId == mojo && !virtualWorkspace"
+				},
+				{
+					"command": "mojo.debugFileInTerminal",
+					"when": "resourceLangId == mojo && !virtualWorkspace && shellExecutionSupported"
+				}
+			],
+			"explorer/context/mojo": [
+				{
+					"command": "mojo.execFileInTerminal",
+					"group": "1_run@0",
+					"when": "resourceLangId == mojo && !virtualWorkspace && shellExecutionSupported"
+				},
+				{
+					"command": "mojo.execFileInDedicatedTerminal",
+					"group": "1_run@1",
+					"when": "resourceLangId == mojo && !virtualWorkspace && shellExecutionSupported"
+				},
+				{
+					"command": "mojo.debugFile",
+					"group": "2_debug@0",
+					"when": "resourceLangId == mojo && !virtualWorkspace"
+				},
+				{
+					"command": "mojo.debugFileInTerminal",
+					"group": "2_debug@1",
+					"when": "resourceLangId == mojo && !virtualWorkspace && shellExecutionSupported"
+				}
+			],
+			"editor/title/run": [
+				{
+					"command": "mojo.execFileInTerminal",
+					"group": "navigation@0",
+					"when": "resourceLangId == mojo && !isInDiffEditor && !virtualWorkspace && shellExecutionSupported"
+				},
+				{
+					"command": "mojo.execFileInDedicatedTerminal",
+					"group": "navigation@1",
+					"when": "resourceLangId == mojo && !isInDiffEditor && !virtualWorkspace && shellExecutionSupported"
+				},
+				{
+					"command": "mojo.debugFile",
+					"group": "navigation@2",
+					"when": "resourceLangId == mojo && !isInDiffEditor && !virtualWorkspace"
+				},
+				{
+					"command": "mojo.debugFileInTerminal",
+					"group": "navigation@3",
+					"when": "resourceLangId == mojo && !isInDiffEditor && !virtualWorkspace && shellExecutionSupported"
+				}
+			]
+		},
+		"breakpoints": [
+			{
+				"language": "ada"
+			},
+			{
+				"language": "arm"
+			},
+			{
+				"language": "asm"
+			},
+			{
+				"language": "c"
+			},
+			{
+				"language": "cpp"
+			},
+			{
+				"language": "crystal"
+			},
+			{
+				"language": "d"
+			},
+			{
+				"language": "fortan"
+			},
+			{
+				"language": "fortran-modern"
+			},
+			{
+				"language": "mojo"
+			},
+			{
+				"language": "nim"
+			},
+			{
+				"language": "objective-c"
+			},
+			{
+				"language": "objectpascal"
+			},
+			{
+				"language": "pascal"
+			},
+			{
+				"language": "rust"
+			},
+			{
+				"language": "swift"
+			}
+		],
+		"debuggers": [
+			{
+				"type": "mojo-lldb",
+				"label": "Mojo",
+				"configurationAttributes": {
+					"launch": {
+						"unevaluatedProperties": false,
+						"properties": {
+							"description": {
+								"type": "string",
+								"description": "The description of the debug configuration."
+							},
+							"program": {
+								"type": "string",
+								"description": "Path to the precompiled program to debug."
+							},
+							"mojoFile": {
+								"type": "string",
+								"description": "If provided, this supersedes the `program` argument and initiates a launch debug session where `mojoFile` is JIT compiled. All other properties keep their intended behavior, e.g. `args` are sent to the JIT compiled program as expected."
+							},
+							"args": {
+								"type": [
+									"array",
+									"string"
+								],
+								"description": "Program arguments.",
+								"default": []
+							},
+							"cwd": {
+								"type": "string",
+								"description": "Program working directory.",
+								"default": "${workspaceFolder}"
+							},
+							"env": {
+								"type": "array",
+								"description": "Additional environment variables to set when launching the program. This is an array of strings that contains the variable name followed by an optional '=' character and the environment variable's value. Example:  [\"FOO=BAR\", \"BAZ\"]",
+								"default": []
+							},
+							"modularHomePath": {
+								"type": "string",
+								"description": "Optional path to the MODULAR_HOME containing the Mojo SDK installation."
+							},
+							"stopOnEntry": {
+								"type": "boolean",
+								"description": "Automatically stop after launch.",
+								"default": false
+							},
+							"disableASLR": {
+								"type": "boolean",
+								"description": "Enable or disable Address space layout randomization if the debugger supports it.",
+								"default": true
+							},
+							"disableSTDIO": {
+								"type": "boolean",
+								"description": "Don't retrieve STDIN, STDOUT and STDERR as the program is running.",
+								"default": false
+							},
+							"shellExpandArguments": {
+								"type": "boolean",
+								"description": "Expand program arguments as a shell would without actually launching the program in a shell.",
+								"default": false
+							},
+							"detachOnError": {
+								"type": "boolean",
+								"description": "Detach from the program.",
+								"default": false
+							},
+							"sourcePath": {
+								"type": "string",
+								"description": "Specify a source path to remap \"./\" to allow full paths to be used when setting breakpoints in binaries that have relative source paths."
+							},
+							"sourceMap": {
+								"type": "array",
+								"description": "Specify an array of path remappings; each element must itself be a two element array containing a source and destination pathname. Overrides sourcePath.",
+								"default": []
+							},
+							"debuggerRoot": {
+								"type": "string",
+								"description": "Specify a working directory to set the debug adaptor to so relative object files can be located."
+							},
+							"targetTriple": {
+								"type": "string",
+								"description": "Triplet of the target architecture to override value derived from the program file."
+							},
+							"platformName": {
+								"type": "string",
+								"description": "Name of the execution platform to override value derived from the program file."
+							},
+							"initCommands": {
+								"type": "array",
+								"description": "Initialization commands executed upon debugger startup.",
+								"default": []
+							},
+							"preRunCommands": {
+								"type": "array",
+								"description": "Commands executed just before the program is launched.",
+								"default": []
+							},
+							"postRunCommands": {
+								"type": "array",
+								"description": "Commands executed just as soon as the program is successfully launched when it's in a stopped state prior to any automatic continuation.",
+								"default": []
+							},
+							"launchCommands": {
+								"type": "array",
+								"description": "Custom commands that are executed instead of launching a process. A target will be created with the launch arguments prior to executing these commands. The commands may optionally create a new target and must perform a launch. A valid process must exist after these commands complete or the \"launch\" will fail. Launch the process with \"process launch -s\" to make the process to at the entry point since lldb-vscode will auto resume if necessary.",
+								"default": []
+							},
+							"stopCommands": {
+								"type": "array",
+								"description": "Commands executed each time the program stops.",
+								"default": []
+							},
+							"exitCommands": {
+								"type": "array",
+								"description": "Commands executed at the end of debugging session.",
+								"default": []
+							},
+							"runInTerminal": {
+								"type": "boolean",
+								"description": "Launch the program inside an integrated terminal in the IDE. Useful for debugging interactive command line programs",
+								"default": false
+							},
+							"timeout": {
+								"type": "string",
+								"description": "The time in seconds to wait for a program to stop at entry point when launching with \"launchCommands\". Defaults to 300 seconds."
+							},
+							"enableAutoVariableSummaries": {
+								"type": "boolean",
+								"description": "Enable auto generated summaries for variables when no summaries exist for a given type. This feature can cause performance delays in large projects when viewing variables.",
+								"default": false
+							},
+							"enableSyntheticChildDebugging": {
+								"type": "boolean",
+								"description": "If a variable is displayed using a synthetic children, also display the actual contents of the variable at the end under a [raw] entry. This is useful when creating sythetic child plug-ins as it lets you see the actual contents of the variable.",
+								"default": false
+							},
+							"commandEscapePrefix": {
+								"type": "string",
+								"description": "The escape prefix to use for executing regular LLDB commands in the Debug Console, instead of printing variables. Defaults to `:`. If it's an empty string, then all expressions in the Debug Console are treated as regular LLDB commands.",
+								"default": ":"
+							},
+							"customFrameFormat": {
+								"type": "string",
+								"description": "If non-empty, stack frames will have descriptions generated based on the provided format. See https://lldb.llvm.org/use/formatting.html for an explanation on format strings for frames. If the format string contains errors, an error message will be displayed on the Debug Console and the default frame names will be used. This might come with a performance cost because debug information might need to be processed to generate the description.",
+								"default": ""
+							},
+							"customThreadFormat": {
+								"type": "string",
+								"description": "If non-empty, threads will have descriptions generated based on the provided format. See https://lldb.llvm.org/use/formatting.html for an explanation on format strings for threads. If the format string contains errors, an error message will be displayed on the Debug Console and the default thread names will be used. This might come with a performance cost because debug information might need to be processed to generate the description.",
+								"default": ""
+							}
+						}
+					},
+					"attach": {
+						"unevaluatedProperties": false,
+						"properties": {
+							"description": {
+								"type": "string",
+								"description": "The description of the debug configuration."
+							},
+							"program": {
+								"type": "string",
+								"description": "Path or name to the program to attach to."
+							},
+							"pid": {
+								"type": [
+									"number",
+									"string"
+								],
+								"description": "System process ID to attach to."
+							},
+							"modularHomePath": {
+								"type": "string",
+								"description": "Optional path to the MODULAR_HOME containing the Mojo SDK installation."
+							},
+							"waitFor": {
+								"type": "boolean",
+								"description": "If set to true, then wait for the process to launch by looking for a process with a basename that matches `program`. No process ID needs to be specified when using this flag.",
+								"default": true
+							},
+							"sourcePath": {
+								"type": "string",
+								"description": "Specify a source path to remap \"./\" to allow full paths to be used when setting breakpoints in binaries that have relative source paths."
+							},
+							"sourceMap": {
+								"type": "array",
+								"description": "Specify an array of path remappings; each element must itself be a two element array containing a source and destination pathname. Overrides sourcePath.",
+								"default": []
+							},
+							"debuggerRoot": {
+								"type": "string",
+								"description": "Specify a working directory to set the debug adaptor to so relative object files can be located."
+							},
+							"targetTriple": {
+								"type": "string",
+								"description": "Triplet of the target architecture to override value derived from the program file."
+							},
+							"platformName": {
+								"type": "string",
+								"description": "Name of the execution platform to override value derived from the program file."
+							},
+							"attachCommands": {
+								"type": "array",
+								"description": "Custom commands that are executed instead of attaching to a process ID or to a process by name. These commands may optionally create a new target and must perform an attach. A valid process must exist after these commands complete or the \"attach\" will fail.",
+								"default": []
+							},
+							"initCommands": {
+								"type": "array",
+								"description": "Initialization commands executed upon debugger startup.",
+								"default": []
+							},
+							"preRunCommands": {
+								"type": "array",
+								"description": "Commands executed just before the program is attached to.",
+								"default": []
+							},
+							"postRunCommands": {
+								"type": "array",
+								"description": "Commands executed just as soon as the program is successfully attached when it's in a stopped state prior to any automatic continuation.",
+								"default": []
+							},
+							"stopCommands": {
+								"type": "array",
+								"description": "Commands executed each time the program stops.",
+								"default": []
+							},
+							"exitCommands": {
+								"type": "array",
+								"description": "Commands executed at the end of debugging session.",
+								"default": []
+							},
+							"coreFile": {
+								"type": "string",
+								"description": "Path to the core file to debug."
+							},
+							"timeout": {
+								"type": "string",
+								"description": "The time in seconds to wait for a program to stop when attaching using \"attachCommands\". Defaults to 300 seconds."
+							},
+							"enableAutoVariableSummaries": {
+								"type": "boolean",
+								"description": "Enable auto generated summaries for variables when no summaries exist for a given type. This feature can cause performance delays in large projects when viewing variables.",
+								"default": false
+							},
+							"enableSyntheticChildDebugging": {
+								"type": "boolean",
+								"description": "If a variable is displayed using a synthetic children, also display the actual contents of the variable at the end under a [raw] entry. This is useful when creating sythetic child plug-ins as it lets you see the actual contents of the variable.",
+								"default": false
+							},
+							"commandEscapePrefix": {
+								"type": "string",
+								"description": "The escape prefix to use for executing regular LLDB commands in the Debug Console, instead of printing variables. Defaults to `:`. If it's an empty string, then all expressions in the Debug Console are treated as regular LLDB commands.",
+								"default": ":"
+							},
+							"customFrameFormat": {
+								"type": "string",
+								"description": "If non-empty, stack frames will have descriptions generated based on the provided format. See https://lldb.llvm.org/use/formatting.html for an explanation on format strings for frames. If the format string contains errors, an error message will be displayed on the Debug Console and the default frame names will be used. This might come with a performance cost because debug information might need to be processed to generate the description.",
+								"default": ""
+							},
+							"customThreadFormat": {
+								"type": "string",
+								"description": "If non-empty, threads will have descriptions generated based on the provided format. See https://lldb.llvm.org/use/formatting.html for an explanation on format strings for threads. If the format string contains errors, an error message will be displayed on the Debug Console and the default thread names will be used. This might come with a performance cost because debug information might need to be processed to generate the description.",
+								"default": ""
+							}
+						}
+					}
+				},
+				"initialConfigurations": [
+					{
+						"type": "mojo-lldb",
+						"request": "launch",
+						"name": "Mojo: Debug current Mojo file",
+						"description": "Launch and debug the Mojo file that is active on the editor when the debug session starts.",
+						"mojoFile": "${file}",
+						"args": [],
+						"env": [],
+						"cwd": "${workspaceFolder}",
+						"runInTerminal": false
+					},
+					{
+						"type": "mojo-lldb",
+						"request": "launch",
+						"name": "Mojo: Debug Mojo file",
+						"description": "Launch and debug a Mojo file given its path.",
+						"mojoFile": "${workspaceFolder}/<your_file.mojo>",
+						"args": [],
+						"env": [],
+						"cwd": "${workspaceFolder}",
+						"runInTerminal": false
+					},
+					{
+						"type": "mojo-lldb",
+						"request": "launch",
+						"name": "Mojo: Debug binary",
+						"description": "Launch and debug a precompiled binary given its path.",
+						"program": "${workspaceFolder}/<your_binary>",
+						"args": [],
+						"env": [],
+						"cwd": "${workspaceFolder}",
+						"runInTerminal": false
+					},
+					{
+						"type": "mojo-lldb",
+						"request": "attach",
+						"name": "Mojo: Attach to process",
+						"description": "Search for a process to attach the debugger to.",
+						"pid": "${command:pickProcessToAttach}"
+					}
+				],
+				"configurationSnippets": [
+					{
+						"label": "Mojo: Debug current Mojo file",
+						"description": "Launch and debug the Mojo file that is active on the editor when the debug session starts.",
+						"body": {
+							"type": "mojo-lldb",
+							"request": "launch",
+							"name": "Mojo: Debug current Mojo file",
+							"description": "Launch and debug the Mojo file that is active on the editor when the debug session starts.",
+							"mojoFile": "^\"\\${file}\"",
+							"args": [],
+							"env": [],
+							"cwd": "^\"\\${workspaceFolder}\"",
+							"runInTerminal": false
+						}
+					},
+					{
+						"label": "Mojo: Debug Mojo file",
+						"description": "Launch and debug a Mojo file given its path.",
+						"body": {
+							"type": "mojo-lldb",
+							"request": "launch",
+							"name": "Mojo: Debug Mojo file",
+							"description": "Launch and debug a Mojo file given its path.",
+							"mojoFile": "^\"\\${workspaceFolder}/<your_file.mojo>\"",
+							"args": [],
+							"env": [],
+							"cwd": "^\"\\${workspaceFolder}\"",
+							"runInTerminal": false
+						}
+					},
+					{
+						"label": "Mojo: Debug binary",
+						"description": "Launch and debug a precompiled binary given its path.",
+						"body": {
+							"type": "mojo-lldb",
+							"request": "launch",
+							"name": "Mojo: Debug binary",
+							"description": "Launch and debug a precompiled binary given its path.",
+							"program": "^\"\\${workspaceFolder}/<your_binary>\"",
+							"args": [],
+							"env": [],
+							"cwd": "^\"\\${workspaceFolder}\"",
+							"runInTerminal": false
+						}
+					},
+					{
+						"label": "Mojo: Attach to process",
+						"description": "Search for a process to attach the debugger to.",
+						"body": {
+							"type": "mojo-lldb",
+							"request": "attach",
+							"name": "Mojo: Attach to process",
+							"description": "Search for a process to attach the debugger to.",
+							"pid": "^\"\\${command:pickProcessToAttach}\""
+						}
+					}
+				],
+				"variables": {
+					"pickProcessToAttach": "mojo.pickProcessToAttach"
+				}
+			}
+		]
+	},
+	"__metadata": {
+		"id": "bebd83d1-5a3e-4aae-ad9e-c892e449af82",
+		"publisherId": "587f9a97-8fcb-4b97-9612-2a6d2a10ee50",
+		"publisherDisplayName": "Modular",
+		"targetPlatform": "undefined",
+		"updated": false,
+		"isPreReleaseVersion": false,
+		"hasPreReleaseVersion": false,
+		"installedTimestamp": 1708298273679,
+		"pinned": false
+	}
+}
